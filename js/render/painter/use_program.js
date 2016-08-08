@@ -69,7 +69,7 @@ module.exports._createProgramCached = function(name, defines, vertexPragmas, fra
     return this.cache[key];
 };
 
-module.exports.useProgram = function (nextProgramName, defines, vertexPragmas, fragmentPragmas) {
+module.exports.useProgram = function (nextProgramName, defines, vertexPragmas, fragmentPragmas, onChange) {
     var gl = this.gl;
 
     defines = defines || [];
@@ -83,6 +83,7 @@ module.exports.useProgram = function (nextProgramName, defines, vertexPragmas, f
     if (previousProgram !== nextProgram) {
         gl.useProgram(nextProgram.program);
         this.currentProgram = nextProgram;
+        if (onChange) onChange(nextProgram);
     }
 
     return nextProgram;
