@@ -1,5 +1,6 @@
 'use strict';
 
+var assert = require('assert');
 var Evented = require('../util/evented');
 var StyleLayer = require('./style_layer');
 var ImageSprite = require('./image_sprite');
@@ -70,11 +71,32 @@ function Style(stylesheet, animationLoop, workerCount) {
         this.fire('load');
     }.bind(this);
 
-    if (typeof stylesheet === 'string') {
-        ajax.getJSON(normalizeURL(stylesheet), stylesheetLoaded);
-    } else {
-        browser.frame(stylesheetLoaded.bind(this, null, stylesheet));
-    }
+    // register any existing custom source types with the workers
+    util.asyncAll(Source.getCustomTypeNames(), function (type, done) {
+        var CustomSource = Source.getType(type);
+        assert(CustomSource);
+
+        if (CustomSource.workerSourceURL) {
+            this.dispatcher.broadcast('load worker source', {
+                name: type,
+                url: CustomSource.workerSourceURL
+            }, done);
+        } else {
+            return done();
+        }
+    }.bind(this), function (err) {
+        if (err) {
+            this.fire('error', {error: err});
+            return;
+        }
+
+        if (typeof stylesheet === 'string') {
+            ajax.getJSON(normalizeURL(stylesheet), stylesheetLoaded);
+        } else {
+            browser.frame(stylesheetLoaded.bind(this, null, stylesheet));
+        }
+    }.bind(this));
+
 
     this.on('source.load', function(event) {
         var source = event.source;
