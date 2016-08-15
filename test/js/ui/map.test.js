@@ -8,6 +8,7 @@ var Style = require('../../../js/style/style');
 var LngLat = require('../../../js/geo/lng_lat');
 var browser = require('../../../js/util/browser');
 var sinon = require('sinon');
+var proxyquire = require('proxyquire');
 
 var fixed = require('../../testutil/fixed');
 var fixedNum = fixed.Num;
@@ -92,6 +93,45 @@ test('Map', function(t) {
         });
 
         t.end();
+    });
+
+    t.test('creates source types before style is set', function (t) {
+        var sourceTypesAdded = [];
+        var Map = proxyquire('../../../js/ui/map', {
+            '../source/source': {
+                addType: function (name, SourceType) {
+                    t.ok(typeof SourceType === 'function');
+                    sourceTypesAdded.push(name);
+                }
+            },
+            '../style/style': function () {
+                t.same(sourceTypesAdded, ['tic', 'tac']);
+                t.end();
+                this.on = function () { return this; };
+            }
+        });
+
+        new Map({
+            container: {
+                offsetWidth: 200,
+                offsetHeight: 200,
+                classList: {
+                    add: function() {},
+                    remove: function() {}
+                }
+            },
+            interactive: false,
+            attributionControl: false,
+            sourceTypes: {
+                'tic': function () {},
+                'tac': function () {}
+            },
+            style: {
+                "version": 8,
+                "sources": {},
+                "layers": []
+            }
+        });
     });
 
     t.test('emits load event after a style is set', function(t) {

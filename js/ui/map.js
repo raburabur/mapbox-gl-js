@@ -7,6 +7,7 @@ var window = require('../util/browser').window;
 var Evented = require('../util/evented');
 var DOM = require('../util/dom');
 
+var Source = require('../source/source');
 var Style = require('../style/style');
 var AnimationLoop = require('../style/animation_loop');
 var Painter = require('../render/painter');
@@ -202,6 +203,11 @@ var Map = module.exports = function(options) {
     this.resize();
 
     if (options.classes) this.setClasses(options.classes);
+    if (options.sourceTypes) {
+        for (var sourceTypeName in options.sourceTypes) {
+            Source.addType(sourceTypeName, options.sourceTypes[sourceTypeName]);
+        }
+    }
     if (options.style) this.setStyle(options.style);
     if (options.attributionControl) this.addControl(new Attribution(options.attributionControl));
 
