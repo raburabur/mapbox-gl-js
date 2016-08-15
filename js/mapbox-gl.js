@@ -14,6 +14,7 @@ mapboxgl.Popup = require('./ui/popup');
 mapboxgl.Marker = require('./ui/marker');
 
 mapboxgl.Style = require('./style/style');
+mapboxgl.Source = require('./source/source');
 
 mapboxgl.LngLat = require('./geo/lng_lat');
 mapboxgl.LngLatBounds = require('./geo/lng_lat_bounds');
